@@ -1,0 +1,8 @@
+{% extends "emails/base_email.html" %}
+{% block body %}
+<h2 style="font-family:Georgia,serif;margin-top:0;color:#8D2236;">Thank you, {{ lead.name }}!</h2>
+<p>We have received your message and our team will get back to you soon{% if lead.preferred_contact %} via {{ lead.get_preferred_contact_display|lower }}{% endif %}.</p>
+<p style="background:#FAF5F0;padding:14px;border-radius:8px;white-space:pre-wrap;">{{ lead.message }}</p>
+{% if site.phone or site.email %}<p>You can also reach us{% if site.phone %} on {{ site.phone }}{% endif %}{% if site.email %} at {{ site.email }}{% endif %}.</p>{% endif %}
+<p>Warm regards,<br>{{ site.site_name }}</p>
+{% endblock %}

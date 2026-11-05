@@ -1,0 +1,9 @@
+<div class="pager">
+  <span>{{ page.paginator.count }} item{{ page.paginator.count|pluralize }}{% if page.paginator.num_pages > 1 %} · Page {{ page.number }} of {{ page.paginator.num_pages }}{% endif %}</span>
+  {% if page.paginator.num_pages > 1 %}
+  <span style="display:flex;gap:8px">
+    {% if page.has_previous %}<a href="?{% if querystring %}{{ querystring }}&amp;{% endif %}page={{ page.previous_page_number }}">‹ Previous</a>{% endif %}
+    {% if page.has_next %}<a href="?{% if querystring %}{{ querystring }}&amp;{% endif %}page={{ page.next_page_number }}">Next ›</a>{% endif %}
+  </span>
+  {% endif %}
+</div>

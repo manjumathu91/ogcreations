@@ -1,0 +1,14 @@
+{% extends "emails/base_email.html" %}
+{% block body %}
+<h2 style="font-family:Georgia,serif;margin-top:0;color:#8D2236;">New {{ lead.get_lead_type_display|lower }}</h2>
+<p><strong>Name:</strong> {{ lead.name }}<br>
+<strong>Email:</strong> {{ lead.email }}<br>
+{% if lead.phone %}<strong>Phone:</strong> {{ lead.phone }}<br>{% endif %}
+{% if lead.whatsapp_number %}<strong>WhatsApp:</strong> {{ lead.whatsapp_number }}<br>{% endif %}
+{% if lead.project_type %}<strong>Project type:</strong> {{ lead.project_type }}<br>{% endif %}
+{% if lead.project_reference %}<strong>Project enquired about:</strong> {{ lead.project_reference }}<br>{% endif %}
+{% if lead.preferred_contact %}<strong>Preferred contact:</strong> {{ lead.get_preferred_contact_display }}<br>{% endif %}</p>
+<p><strong>Message</strong></p>
+<p style="background:#FAF5F0;padding:14px;border-radius:8px;white-space:pre-wrap;">{{ lead.message }}</p>
+<p style="font-size:13px;color:#6b6460;">Reply directly to this email to reach the sender. Manage the lead from the dashboard.</p>
+{% endblock %}

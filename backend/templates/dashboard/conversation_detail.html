@@ -1,0 +1,15 @@
+{% extends "dashboard/base.html" %}
+{% block content %}
+<div class="page-head">
+  <div><h2>{{ obj }}</h2><p><span class="badge badge-{{ obj.scope }}">{{ obj.get_scope_display }}</span> · started {{ obj.created_at|date:"d M Y, H:i" }}{% if obj.user %} · by {{ obj.user.username }}{% endif %}</p></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <a class="btn btn-ghost" href="{% url 'dashboard:module_list' module.key %}"><svg class="i"><use href="#i-arrow-left"/></svg> Back</a>
+    {% if obj.scope == "admin" and obj.user_id == request.user.id %}<a class="btn btn-accent" href="{% url 'dashboard:ai_chat' %}?c={{ obj.pk }}"><svg class="i"><use href="#i-sparkles"/></svg> Continue chat</a>{% endif %}
+    <form method="post" class="inline" action="{% url 'dashboard:module_delete' module.key obj.pk %}" data-confirm="Delete this conversation and all of its messages?" data-confirm-title="Delete conversation?">{% csrf_token %}<input type="hidden" name="next" value="{% url 'dashboard:module_list' module.key %}">
+      <button class="btn btn-danger" type="submit"><svg class="i"><use href="#i-trash"/></svg> Delete</button></form>
+  </div>
+</div>
+<div class="card"><div class="chat" style="max-height:none">
+  {% for m in obj.messages.all %}<div class="bubble {{ m.role }}">{{ m.content }}<small>{{ m.created_at|date:"d M, H:i" }}</small></div>{% empty %}<p class="help">No messages.</p>{% endfor %}
+</div></div>
+{% endblock %}

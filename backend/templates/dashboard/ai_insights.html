@@ -1,0 +1,27 @@
+{% extends "dashboard/base.html" %}
+{% load static %}
+{% block content %}
+<div class="page-head"><div><h2>AI Insights</h2><p>What visitors ask the public chat assistant. Only visitor questions are analysed - no leads or personal enquiry data.</p></div></div>
+{% if not ai.available %}<div class="alert alert-warn"><strong>AI is not available:</strong> {{ ai.message }} Statistics below are still real.</div>{% endif %}
+<div class="stats">
+  <div class="card stat"><span class="ico"><svg class="i"><use href="#i-message"/></svg></span><div><b>{{ public_conversations }}</b><span>Public conversations</span></div></div>
+  <div class="card stat"><span class="ico"><svg class="i"><use href="#i-activity"/></svg></span><div><b>{{ public_questions }}</b><span>Visitor questions (total)</span></div></div>
+  <div class="card stat accent"><span class="ico"><svg class="i"><use href="#i-calendar"/></svg></span><div><b>{{ questions_7d }}</b><span>Questions, last 7 days</span></div></div>
+  <div class="card stat"><span class="ico"><svg class="i"><use href="#i-sparkles"/></svg></span><div><b>{{ admin_conversations }}</b><span>Admin AI conversations</span></div></div>
+</div>
+<div class="two-col">
+  <div>
+    <div class="card"><div class="card-head"><h3>Questions per day</h3></div>
+      {% for d in daily %}<div class="bar-row"><span>{{ d.label }}</span><div class="bar"><i style="width:{{ d.pct }}%"></i></div><b>{{ d.count }}</b></div>{% endfor %}</div>
+    <div class="card"><div class="card-head"><h3>AI summary of visitor questions</h3><button class="btn btn-accent btn-sm" id="insight-run" type="button" data-url="/api/admin/ai/generate/"><svg class="i"><use href="#i-sparkles"/></svg> Generate</button></div>
+      <div class="output" id="insight-output">Click Generate for an AI-written summary (draft - review before acting on it).</div></div>
+  </div>
+  <div>
+    <div class="card"><div class="card-head"><h3>Common topics</h3></div>
+      {% if top_terms %}<div style="display:flex;gap:8px;flex-wrap:wrap">{% for term, n in top_terms %}<span class="badge">{{ term }} · {{ n }}</span>{% endfor %}</div>{% else %}<p class="help">No visitor questions yet.</p>{% endif %}</div>
+    <div class="card"><div class="card-head"><h3>Latest questions</h3></div>
+      {% if recent_questions %}<ul class="feed">{% for m in recent_questions %}<li><span>{{ m.content|truncatechars:110 }}</span><small>{{ m.created_at|timesince }} ago</small></li>{% endfor %}</ul>{% else %}<p class="help">Nothing yet.</p>{% endif %}</div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}<script src="{% static 'js/ai_chat.js' %}"></script>{% endblock %}

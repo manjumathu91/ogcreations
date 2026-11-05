@@ -1,0 +1,36 @@
+{% extends "dashboard/base.html" %}
+{% block content %}
+<div class="page-head"><div><h2>Lead Status</h2><p>Track every enquiry through New → Contacted → In Progress → Completed / Rejected. Change a status straight from the table.</p></div></div>
+<div class="status-cards">
+  <a href="{% url 'dashboard:lead_status' %}" class="{% if not status %}active{% endif %}"><b>{{ total }}</b>All leads</a>
+  {% for s in summary %}<a href="?status={{ s.value }}" class="{% if s.active %}active{% endif %}"><b>{{ s.count }}</b>{{ s.label }}</a>{% endfor %}
+</div>
+<form method="get" class="toolbar">
+  <div class="search"><svg class="i"><use href="#i-search"/></svg><input class="input" type="search" name="q" value="{{ q }}" placeholder="Search name, email, project, message…"></div>
+  <select class="input" name="status" data-autosubmit aria-label="Status"><option value="">All statuses</option>{% for v, l in status_choices %}<option value="{{ v }}" {% if status == v %}selected{% endif %}>{{ l }}</option>{% endfor %}</select>
+  <select class="input" name="type" data-autosubmit aria-label="Type"><option value="">All types</option>{% for v, l in type_choices %}<option value="{{ v }}" {% if type == v %}selected{% endif %}>{{ l }}</option>{% endfor %}</select>
+  <button class="btn btn-ghost" type="submit">Search</button>
+  {% if q or status or type %}<a class="btn btn-ghost" href="{% url 'dashboard:lead_status' %}">Clear</a>{% endif %}
+</form>
+{% if page.object_list %}
+<div class="table-wrap"><table>
+  <thead><tr><th>Name</th><th>Type</th><th>Project</th><th>Received</th><th>Status</th><th style="text-align:right">Open</th></tr></thead>
+  <tbody>{% for lead in page.object_list %}
+    <tr>
+      <td><strong>{{ lead.name }}</strong><br><small style="color:var(--muted)">{{ lead.email }}</small></td>
+      <td>{{ lead.get_lead_type_display }}</td>
+      <td>{{ lead.project_type|default:"—" }}</td>
+      <td>{{ lead.created_at|date:"d M Y, H:i" }}</td>
+      <td>
+        <form method="post" action="{% url 'dashboard:lead_quick_status' lead.pk %}">{% csrf_token %}<input type="hidden" name="next" value="{{ next }}">
+          <select class="input" name="status" data-autosubmit aria-label="Change status">{% for v, l in status_choices %}<option value="{{ v }}" {% if lead.status == v %}selected{% endif %}>{{ l }}</option>{% endfor %}</select>
+        </form>
+      </td>
+      <td><div class="actions"><a class="btn btn-ghost btn-sm" href="{% if lead.lead_type == 'project' %}{% url 'dashboard:module_edit' 'project_leads' lead.pk %}{% else %}{% url 'dashboard:module_edit' 'contact_leads' lead.pk %}{% endif %}"><svg class="i"><use href="#i-eye"/></svg> Details</a></div></td>
+    </tr>{% endfor %}</tbody>
+</table></div>
+{% include "dashboard/_pagination.html" %}
+{% else %}
+<div class="card empty"><svg class="i"><use href="#i-inbox"/></svg><h3>No leads found</h3><p>{% if q or status or type %}Try clearing the filters.{% else %}New enquiries from your website will appear here.{% endif %}</p></div>
+{% endif %}
+{% endblock %}

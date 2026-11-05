@@ -1,0 +1,79 @@
+{% load static %}<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="csrf-token" content="{{ csrf_token }}">
+<meta name="robots" content="noindex,nofollow">
+<title>{% block title %}{{ page_title|default:"Dashboard" }}{% endblock %} · {{ brand.site_name|default:"OG Creations" }}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+{% if brand.favicon %}<link rel="icon" href="{{ brand.favicon.url }}">{% else %}<link rel="icon" href="{% static 'images/og-mark.svg' %}" type="image/svg+xml">{% endif %}
+{% block extra_head %}{% endblock %}
+</head>
+<body>
+{% include "dashboard/_icons.html" %}
+<div class="shell">
+  <aside class="sidebar" id="sidebar" aria-label="Main navigation">
+    <div class="brand-box">
+      {% if brand.logo %}<img src="{{ brand.logo.url }}" alt="">{% else %}<div class="brand-mark">{{ brand.site_name|default:"O"|slice:":1" }}</div>{% endif %}
+      <div><div class="brand-name">{{ brand.site_name|default:"OG Creations" }}</div><div class="brand-sub">Studio Dashboard</div></div>
+    </div>
+    <nav class="nav">
+      {% for item in sidebar %}
+        {% if item.kind == "link" %}
+          <a class="nav-link {% if item.active %}active{% endif %}" href="{{ item.url }}">
+            <svg class="i"><use href="#i-{{ item.icon }}"/></svg><span>{{ item.label }}</span>
+            {% if item.label == "Contact Form Submissions" and new_leads_count %}<em class="count">{{ new_leads_count }}</em>{% endif %}
+          </a>
+        {% elif item.kind == "group" %}
+          <div class="nav-group {% if item.open %}open{% endif %}">
+            <button type="button" class="nav-link group-toggle" aria-expanded="{% if item.open %}true{% else %}false{% endif %}">
+              <svg class="i"><use href="#i-{{ item.icon }}"/></svg><span>{{ item.label }}</span>
+              {% if item.label == "Contact & Leads" and new_leads_count %}<em class="count">{{ new_leads_count }}</em>{% endif %}
+              <svg class="i chev"><use href="#i-chevron"/></svg>
+            </button>
+            <div class="sub">
+              {% for child in item.children %}<a class="nav-link {% if child.active %}active{% endif %}" href="{{ child.url }}">{{ child.label }}</a>{% endfor %}
+            </div>
+          </div>
+        {% else %}
+          <form method="post" action="{% url 'accounts:logout' %}">{% csrf_token %}
+            <button type="submit" class="nav-link"><svg class="i"><use href="#i-{{ item.icon }}"/></svg><span>{{ item.label }}</span></button>
+          </form>
+        {% endif %}
+      {% endfor %}
+    </nav>
+  </aside>
+  <div class="overlay" id="overlay"></div>
+  <div class="main">
+    <header class="topbar">
+      <button class="burger" id="burger" type="button" aria-label="Toggle menu"><svg class="i"><use href="#i-menu"/></svg></button>
+      <h1>{{ page_title|default:"Dashboard" }}</h1>
+      <div class="top-actions">
+        {% if frontend_url %}<a class="btn btn-ghost btn-sm" href="{{ frontend_url }}" target="_blank" rel="noopener"><svg class="i"><use href="#i-external"/></svg> View website</a>{% endif %}
+        <a class="user-chip" href="{% url 'accounts:profile' %}">
+          <span class="avatar">{{ request.user.username|slice:":1" }}</span>
+          <span>{{ request.user.get_full_name|default:request.user.username }}<small>{% if request.user.is_superuser %}Superuser{% else %}Staff{% endif %}</small></span>
+        </a>
+      </div>
+    </header>
+    <main class="content">
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</div>
+<div id="toasts" aria-live="polite">
+  {% for message in messages %}<div class="toast toast-{{ message.tags }}">{{ message }}</div>{% endfor %}
+</div>
+<dialog id="confirm-dialog">
+  <h3 id="confirm-title">Are you sure?</h3>
+  <p id="confirm-text"></p>
+  <div class="row"><button type="button" class="btn btn-ghost" id="confirm-no">Cancel</button><button type="button" class="btn btn-danger" id="confirm-yes">Yes, continue</button></div>
+</dialog>
+<script src="{% static 'js/dashboard.js' %}"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

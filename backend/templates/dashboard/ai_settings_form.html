@@ -1,0 +1,4 @@
+{% extends "dashboard/form.html" %}
+{% block form_top %}
+<div class="alert alert-info">The Groq <strong>API key</strong> and <strong>model</strong> are never stored in the database or shown here - set <code>GROQ_API_KEY</code>, <code>GROQ_MODEL</code> and <code>AI_ENABLED</code> in the server environment (.env). If they are missing, AI endpoints return a clear configuration message instead of pretending to work.</div>
+{% endblock %}

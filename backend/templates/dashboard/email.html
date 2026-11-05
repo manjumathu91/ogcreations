@@ -1,0 +1,35 @@
+{% extends "dashboard/base.html" %}
+{% block content %}
+<div class="page-head"><div><h2>Email Management</h2><p>SMTP is configured through environment variables (never stored in the database). Enquiries are always saved first - a failed email never loses a lead.</p></div></div>
+{% if not config.configured %}<div class="alert alert-warn">SMTP is not fully configured. Set <code>EMAIL_HOST</code>, <code>EMAIL_HOST_USER</code> and <code>EMAIL_HOST_PASSWORD</code> in the environment (.env), restart, then send a test email.</div>{% endif %}
+<div class="two-col">
+  <div class="card">
+    <div class="card-head"><h3>SMTP configuration</h3>{% if config.configured %}<span class="badge badge-on">Configured</span>{% else %}<span class="badge badge-failed">Incomplete</span>{% endif %}</div>
+    <dl class="kv">
+      <dt>Backend</dt><dd>{{ config.backend }}</dd><dt>Host</dt><dd>{{ config.host }}:{{ config.port }}</dd>
+      <dt>Username</dt><dd>{{ config.user }}</dd><dt>Password</dt><dd>{% if config.password_set %}•••••• (set){% else %}not set{% endif %}</dd>
+      <dt>TLS / SSL</dt><dd>{{ config.use_tls|yesno:"TLS on,TLS off" }} / {{ config.use_ssl|yesno:"SSL on,SSL off" }}</dd>
+      <dt>From address</dt><dd>{{ config.from_email }}</dd><dt>Admin recipient</dt><dd>{{ config.admin_notify_email }}</dd>
+    </dl>
+  </div>
+  <form class="card" method="post" action="{% url 'dashboard:email_test' %}">
+    {% csrf_token %}
+    <div class="card-head"><h3>Send a test email</h3></div>
+    <div class="field">{{ form.to_email.label_tag }}{{ form.to_email }}</div>
+    <div class="form-actions"><button class="btn" type="submit"><svg class="i"><use href="#i-send"/></svg> Send test</button></div>
+    <p class="help" style="margin-top:8px">Sent: {{ sent_count }} · Failed: {{ failed_count }}</p>
+  </form>
+</div>
+<div class="card">
+  <div class="card-head"><h3>Email log</h3>
+    <form method="get"><select class="input" name="status" data-autosubmit aria-label="Filter"><option value="">All</option><option value="sent" {% if status == "sent" %}selected{% endif %}>Sent</option><option value="failed" {% if status == "failed" %}selected{% endif %}>Failed</option></select></form></div>
+  {% if page.object_list %}
+  <div class="table-wrap"><table><thead><tr><th>When</th><th>Type</th><th>To</th><th>Subject</th><th>Status</th></tr></thead>
+    <tbody>{% for log in page.object_list %}<tr>
+      <td>{{ log.created_at|date:"d M, H:i" }}</td><td>{{ log.get_kind_display }}</td><td>{{ log.to_email }}</td>
+      <td>{{ log.subject }}{% if log.error_message %}<br><small style="color:var(--danger)">{{ log.error_message }}</small>{% endif %}</td>
+      <td><span class="badge badge-{{ log.status }}">{{ log.get_status_display }}</span></td></tr>{% endfor %}</tbody></table></div>
+  {% include "dashboard/_pagination.html" %}
+  {% else %}<div class="empty"><svg class="i"><use href="#i-send"/></svg><h3>No emails yet</h3><p>Notifications and test emails will be logged here with their status.</p></div>{% endif %}
+</div>
+{% endblock %}

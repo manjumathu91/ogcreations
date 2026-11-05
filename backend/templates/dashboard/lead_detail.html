@@ -1,0 +1,55 @@
+{% extends "dashboard/base.html" %}
+{% block content %}
+{% with wa=obj.whatsapp_link %}
+<div class="page-head">
+  <div><h2>{{ obj.name }}</h2><p>{{ obj.get_lead_type_display }} · received {{ obj.created_at|date:"d M Y, H:i" }} · <span class="badge badge-{{ obj.status }}">{{ obj.get_status_display }}</span></p></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <a class="btn btn-ghost" href="{% url 'dashboard:module_list' module.key %}"><svg class="i"><use href="#i-arrow-left"/></svg> Back</a>
+    <a class="btn btn-ghost" href="mailto:{{ obj.email }}"><svg class="i"><use href="#i-mail"/></svg> Email</a>
+    {% if wa %}<a class="btn btn-accent" href="{{ wa }}" target="_blank" rel="noopener"><svg class="i"><use href="#i-message"/></svg> WhatsApp</a>{% endif %}
+  </div>
+</div>
+<div class="two-col">
+  <div>
+    <div class="card">
+      <div class="card-head"><h3>Enquiry details</h3></div>
+      <dl class="kv">
+        <dt>Name</dt><dd>{{ obj.name }}</dd>
+        <dt>Email</dt><dd><a href="mailto:{{ obj.email }}">{{ obj.email }}</a></dd>
+        <dt>Phone</dt><dd>{% if obj.phone %}<a href="tel:{{ obj.phone }}">{{ obj.phone }}</a>{% else %}—{% endif %}</dd>
+        <dt>WhatsApp</dt><dd>{{ obj.whatsapp_number|default:"—" }}</dd>
+        <dt>Project type</dt><dd>{{ obj.project_type|default:"—" }}</dd>
+        {% if obj.project_reference %}<dt>Enquired about</dt><dd>{{ obj.project_reference }}</dd>{% endif %}
+        <dt>Preferred contact</dt><dd>{{ obj.get_preferred_contact_display|default:"—" }}</dd>
+        <dt>Created</dt><dd>{{ obj.created_at|date:"d M Y, H:i" }}</dd>
+        <dt>Last updated</dt><dd>{{ obj.updated_at|date:"d M Y, H:i" }}</dd>
+      </dl>
+      <h3 style="margin-top:20px">Message</h3>
+      <div class="output">{{ obj.message }}</div>
+      {% if not wa %}<p class="help" style="margin-top:10px">No WhatsApp link: the visitor gave no phone/WhatsApp number.</p>{% endif %}
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>Email notifications</h3></div>
+      {% with logs=obj.email_logs.all %}
+      {% if logs %}<ul class="feed">{% for l in logs %}<li><span>{{ l.get_kind_display }} → {{ l.to_email }}{% if l.error_message %}<br><small style="white-space:normal;color:var(--danger)">{{ l.error_message }}</small>{% endif %}</span><span class="badge badge-{{ l.status }}">{{ l.get_status_display }}</span></li>{% endfor %}</ul>
+      {% else %}<p class="help">No email attempts recorded for this lead.</p>{% endif %}
+      {% endwith %}
+    </div>
+  </div>
+  <div>
+    <form method="post" class="card" novalidate>
+      {% csrf_token %}
+      <div class="card-head"><h3>Status &amp; internal notes</h3></div>
+      {% if form.non_field_errors %}<div class="alert alert-error">{{ form.non_field_errors }}</div>{% endif %}
+      <div style="display:grid;gap:16px">{% for field in form %}{% include "dashboard/_field.html" %}{% endfor %}</div>
+      <div class="form-actions"><button class="btn" type="submit"><svg class="i"><use href="#i-save"/></svg> Save</button></div>
+      <p class="help" style="margin-top:10px">Internal notes are private: never shown on the website or to the public AI assistant.</p>
+    </form>
+    <form class="card" method="post" action="{% url 'dashboard:module_delete' module.key obj.pk %}" data-confirm="Permanently delete the enquiry from {{ obj.name }}? This cannot be undone." data-confirm-title="Delete lead?">
+      {% csrf_token %}<input type="hidden" name="next" value="{% url 'dashboard:module_list' module.key %}">
+      <button class="btn btn-danger" type="submit"><svg class="i"><use href="#i-trash"/></svg> Delete lead</button>
+    </form>
+  </div>
+</div>
+{% endwith %}
+{% endblock %}

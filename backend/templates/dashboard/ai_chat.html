@@ -1,0 +1,33 @@
+{% extends "dashboard/base.html" %}
+{% load static %}
+{% block content %}
+<div class="page-head"><div><h2>AI Studio Assistant</h2><p>Draft copy, summaries and emails. Everything is a <strong>draft for your review</strong> - nothing is saved to the website or emailed automatically.</p></div>
+  <a class="btn btn-ghost" href="{% url 'dashboard:module_list' 'ai_conversations' %}">Previous conversations</a></div>
+{% if not ai.available %}<div class="alert alert-warn"><strong>AI is not available:</strong> {{ ai.message }}</div>{% endif %}
+<div id="ai-app" data-chat-url="/api/admin/ai/chat/" data-generate-url="/api/admin/ai/generate/" data-conversation="{{ conversation.pk|default:'' }}" data-hints="{{ hints_json }}">
+<div class="two-col">
+  <div class="card">
+    <div class="card-head"><h3>{% if conversation %}{{ conversation }}{% else %}Chat{% endif %}</h3>{% if conversation %}<a class="btn btn-ghost btn-sm" href="{% url 'dashboard:ai_chat' %}">New chat</a>{% endif %}</div>
+    <div class="chat" id="chat-log">
+      {% for m in chat_messages %}<div class="bubble {{ m.role }}">{{ m.content }}</div>{% endfor %}
+      {% if not chat_messages %}<div class="bubble assistant">Hi! Ask me to write copy, plan content or help with lead follow-ups.</div>{% endif %}
+    </div>
+    <form id="chat-form" class="chat-form"><textarea class="input" id="chat-input" rows="2" maxlength="4000" placeholder="Message the assistant… (Enter to send, Shift+Enter for new line)"></textarea>
+      <button class="btn" type="submit"><svg class="i"><use href="#i-send"/></svg> Send</button></form>
+  </div>
+  <div>
+    <div class="card">
+      <div class="card-head"><h3>Quick tools</h3></div>
+      <div class="field"><label for="task-select">Task</label>
+        <select class="input" id="task-select" style="width:100%">{% for key, t in tasks.items %}<option value="{{ key }}">{{ t.label }}</option>{% endfor %}</select></div>
+      <div class="field" style="margin-top:12px"><label for="task-input">Details</label><textarea class="input" id="task-input" rows="4" maxlength="4000"></textarea><p class="help" id="task-hint"></p></div>
+      <div class="form-actions" style="border:0;padding-top:0"><button class="btn btn-accent" type="button" id="task-run"><svg class="i"><use href="#i-sparkles"/></svg> Generate</button><button class="btn btn-ghost" type="button" id="task-copy" hidden>Copy</button></div>
+      <p class="help" id="task-notice" hidden>AI-generated draft - review and edit before saving or sending.</p>
+      <div class="output" id="task-output">Output appears here.</div>
+    </div>
+    {% if recent %}<div class="card"><div class="card-head"><h3>Recent chats</h3></div><ul class="feed">{% for c in recent %}<li><a href="{% url 'dashboard:ai_chat' %}?c={{ c.pk }}">{{ c }}</a><small>{{ c.updated_at|timesince }} ago</small></li>{% endfor %}</ul></div>{% endif %}
+  </div>
+</div>
+</div>
+{% endblock %}
+{% block extra_js %}<script src="{% static 'js/ai_chat.js' %}"></script>{% endblock %}

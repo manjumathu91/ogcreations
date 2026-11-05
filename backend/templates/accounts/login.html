@@ -1,0 +1,25 @@
+{% load static %}<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex,nofollow">
+<title>Sign in · OG Creations Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+<link rel="icon" href="{% static 'images/og-mark.svg' %}" type="image/svg+xml">
+</head>
+<body>
+<div class="auth"><div class="auth-card">
+  <div class="brand-mark">OG</div>
+  <h1>OG Creations</h1>
+  <p class="sub">Sign in to the studio dashboard</p>
+  <form method="post" novalidate>
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ next }}">
+    {% if form.non_field_errors %}<div class="alert alert-error" style="margin:0">{% for e in form.non_field_errors %}{{ e }} {% endfor %}</div>{% endif %}
+    <div class="field {% if form.username.errors %}has-error{% endif %}"><label for="{{ form.username.id_for_label }}">Username</label>{{ form.username }}{% for e in form.username.errors %}<p class="error">{{ e }}</p>{% endfor %}</div>
+    <div class="field {% if form.password.errors %}has-error{% endif %}"><label for="{{ form.password.id_for_label }}">Password</label>{{ form.password }}{% for e in form.password.errors %}<p class="error">{{ e }}</p>{% endfor %}</div>
+    <button class="btn" type="submit" style="width:100%">Sign in</button>
+  </form>
+</div></div>
+<script>document.addEventListener("submit",function(e){var b=e.target.querySelector("button[type=submit]");if(b)setTimeout(function(){b.classList.add("loading")},0)});</script>
+</body></html>

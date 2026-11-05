@@ -1,0 +1,15 @@
+{% extends "dashboard/form.html" %}
+{% block form_top %}
+<div class="alert alert-info">Uses the standard <strong>wa.me</strong> click-to-chat link - no WhatsApp Business API needed. Enter the number with the country code (e.g. +91…). Changes apply to the floating button, contact section, footer and project enquiry buttons on the website.</div>
+{% endblock %}
+{% block form_bottom %}
+<div class="card">
+  <div class="card-head"><h3>Preview link</h3></div>
+  {% if whatsapp_preview %}
+    <p style="word-break:break-all"><a href="{{ whatsapp_preview }}" target="_blank" rel="noopener">{{ whatsapp_preview }}</a></p>
+    <a class="btn btn-accent" href="{{ whatsapp_preview }}" target="_blank" rel="noopener"><svg class="i"><use href="#i-message"/></svg> Test in WhatsApp</a>
+  {% else %}
+    <p class="help">Save a WhatsApp number (and keep WhatsApp enabled) to generate the link.</p>
+  {% endif %}
+</div>
+{% endblock %}
