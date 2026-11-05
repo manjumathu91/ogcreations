@@ -216,6 +216,9 @@ CORS_ALLOW_CREDENTIALS = False
 CSRF_TRUSTED_ORIGINS = env_list("CSRF_TRUSTED_ORIGINS", "")
 FRONTEND_URL = env("FRONTEND_URL", "")  # optional: shown as "Visit website" in the dashboard
 
+# --------------------------------------------------------------------------- WhatsApp
+WHATSAPP_PHONE_NUMBER = env("WHATSAPP_PHONE_NUMBER")
+
 # --------------------------------------------------------------------------- email (SMTP)
 EMAIL_HOST = env("EMAIL_HOST")
 EMAIL_PORT = env_int("EMAIL_PORT", 587)
