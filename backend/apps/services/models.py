@@ -13,6 +13,11 @@ class Service(TimeStamped, OrderedActive):
     description = models.TextField(blank=True)
     icon = models.CharField(max_length=60, blank=True, help_text="Emoji or icon class name.")
     image = models.ImageField(upload_to="services/", blank=True, validators=[validate_image])
+    additional_images = models.ManyToManyField(
+    "media_library.MediaItem",
+    blank=True,
+    related_name="+",
+)
 
     class Meta:
         ordering = ["order", "id"]

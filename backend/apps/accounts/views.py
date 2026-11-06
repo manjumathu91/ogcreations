@@ -11,12 +11,16 @@ from django.utils.decorators import method_decorator
 from .decorators import staff_required
 from .forms import ProfileForm, StaffAuthenticationForm, StyledPasswordChangeForm
 
-
 class StaffLoginView(LoginView):
     template_name = "accounts/login.html"
     authentication_form = StaffAuthenticationForm
     redirect_authenticated_user = True
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        from apps.site_settings.models import SiteSettings
+        context["brand"] = SiteSettings.load()
+        return context
 
 class StaffLogoutView(LogoutView):
     next_page = reverse_lazy("accounts:login")  # POST only (Django 5)

@@ -1,11 +1,43 @@
+
+
 <div class="field {% if field.errors %}has-error{% endif %}">
   {% if field.widget_type == "checkbox" %}
     <label class="check-row">{{ field }}<span>{{ field.label }}</span></label>
   {% else %}
-    <label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %}<em class="req">*</em>{% endif %}</label>
-    {% if field.field.widget.attrs.accept and field.value and field.value.url %}<div class="current-img"><img src="{{ field.value.url }}" alt=""></div>{% endif %}
-    {{ field }}
+    <label for="{{ field.id_for_label }}">
+      {{ field.label }}{% if field.field.required %}<em class="req">*</em>{% endif %}
+    </label>
+
+    
+{% if field.name == "additional_images" or field.name == "gallery_images" %}
+  <div class="additional-image-picker">
+    {% for item in field.field.queryset %}
+      <label class="additional-image-option">
+        <input
+          type="checkbox"
+          name="{{ field.html_name }}"
+          value="{{ item.pk }}"
+          {% if item.pk|stringformat:"s" in field.value %}checked{% endif %}
+        >
+        {% if item.file %}
+          <img src="{{ item.file.url }}" alt="{{ item.title }}">
+        {% endif %}
+        <span>{{ item.title }}</span>
+      </label>
+    {% endfor %}
+  </div>
+{% else %}
+  {% if field.field.widget.attrs.accept and field.value and field.value.url %}
+    <div class="current-img">
+      <img src="{{ field.value.url }}" alt="">
+    </div>
   {% endif %}
+  {{ field }}
+{% endif %}
+
+    
+  {% endif %}
+
   {% if field.help_text %}<p class="help">{{ field.help_text }}</p>{% endif %}
   {% for e in field.errors %}<p class="error">{{ e }}</p>{% endfor %}
 </div>

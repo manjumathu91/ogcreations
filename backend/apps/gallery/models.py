@@ -6,6 +6,11 @@ from apps.core.validators import validate_image
 
 class BTSImage(TimeStamped, OrderedActive):
     image = models.ImageField(upload_to="bts/", validators=[validate_image])
+    additional_images = models.ManyToManyField(
+    "media_library.MediaItem",
+    blank=True,
+    related_name="+",
+)
     title = models.CharField(max_length=150, blank=True)
     description = models.TextField(blank=True)
     category = models.CharField(max_length=80, blank=True)

@@ -1,62 +1,219 @@
+
+
 {% extends "dashboard/base.html" %}
+
 {% block content %}
-<div class="page-head"><div><h2>Welcome back, {{ request.user.first_name|default:request.user.username }}</h2><p>Live overview of your studio website, enquiries and content.</p></div>
-  <a class="btn btn-accent" href="{% url 'dashboard:lead_status' %}"><svg class="i"><use href="#i-inbox"/></svg> Open leads</a></div>
+
+<div class="page-head">
+    <div>
+        <h2>Welcome back, {{ request.user.first_name|default:request.user.username }}</h2>
+        <p>Live overview of your studio website, enquiries and content.</p>
+    </div>
+
+    <a class="btn btn-accent" href="{% url 'dashboard:lead_status' %}">
+        <svg class="i"><use href="#i-inbox"/></svg>
+        Open leads
+    </a>
+</div>
 
 <div class="stats">
-  {% for c in cards %}
-  <a class="card stat {% if c.accent %}accent{% endif %}" href="{{ c.url }}">
-    <span class="ico"><svg class="i"><use href="#i-{{ c.icon }}"/></svg></span>
-    <div><b>{{ c.value }}</b><span>{{ c.label }}</span></div>
-  </a>
-  {% endfor %}
+    {% for c in cards %}
+    <a class="card stat {% if c.accent %}accent{% endif %}" href="{{ c.url }}">
+        <span class="ico">
+            <svg class="i"><use href="#i-{{ c.icon }}"/></svg>
+        </span>
+        <div>
+            <b>{{ c.value }}</b>
+            <span>{{ c.label }}</span>
+        </div>
+    </a>
+    {% endfor %}
 </div>
 
 <div class="two-col">
-  <div>
-    <div class="card">
-      <div class="card-head"><h3>Recent enquiries</h3><a href="{% url 'dashboard:lead_status' %}">View all</a></div>
-      {% if recent_leads %}
-      <div class="table-wrap"><table>
-        <thead><tr><th>Name</th><th>Type</th><th>Project</th><th>Status</th><th>Received</th></tr></thead>
-        <tbody>{% for lead in recent_leads %}
-          <tr>
-            <td><a href="{% if lead.lead_type == 'project' %}{% url 'dashboard:module_edit' 'project_leads' lead.pk %}{% else %}{% url 'dashboard:module_edit' 'contact_leads' lead.pk %}{% endif %}"><strong>{{ lead.name }}</strong></a></td>
-            <td>{{ lead.get_lead_type_display }}</td><td>{{ lead.project_type|default:"—" }}</td>
-            <td><span class="badge badge-{{ lead.status }}">{{ lead.get_status_display }}</span></td>
-            <td>{{ lead.created_at|date:"d M, H:i" }}</td>
-          </tr>{% endfor %}</tbody></table></div>
-      {% else %}<div class="empty"><svg class="i"><use href="#i-inbox"/></svg><h3>No enquiries yet</h3><p>Submissions from your website contact form will show up here.</p></div>{% endif %}
+
+    <!-- Left column -->
+    <div>
+
+        <!-- Recent enquiries -->
+        <div class="card">
+            <div class="card-head">
+                <h3>Recent enquiries</h3>
+                <a href="{% url 'dashboard:lead_status' %}">View all</a>
+            </div>
+
+            {% if recent_leads %}
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Project</th>
+                            <th>Status</th>
+                            <th>Received</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for lead in recent_leads %}
+                        <tr>
+                            <td>
+                                <a href="{% if lead.lead_type == 'project' %}{% url 'dashboard:module_edit' 'project_leads' lead.pk %}{% else %}{% url 'dashboard:module_edit' 'contact_leads' lead.pk %}{% endif %}">
+                                    <strong>{{ lead.name }}</strong>
+                                </a>
+                            </td>
+
+                            <td>{{ lead.get_lead_type_display }}</td>
+                            <td>{{ lead.project_type|default:"—" }}</td>
+
+                            <td>
+                                <span class="badge badge-{{ lead.status }}">
+                                    {{ lead.get_status_display }}
+                                </span>
+                            </td>
+
+                            <td>{{ lead.created_at|date:"d M, H:i" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {% else %}
+            <div class="empty">
+                <svg class="i"><use href="#i-inbox"/></svg>
+                <h3>No enquiries yet</h3>
+                <p>Submissions from your website contact form will show up here.</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Recent activity -->
+        <div class="card">
+            <div class="card-head">
+                <h3>Recent activity</h3>
+            </div>
+
+            {% if activities %}
+            <ul class="feed">
+                {% for a in activities %}
+                <li>
+                    <span>
+                        <strong>{{ a.user.username|default:"System" }}</strong>
+                        {{ a.get_action_display|lower }}
+                        <em>{{ a.module }}</em>
+                        {% if a.object_repr %}: {{ a.object_repr }}{% endif %}
+                    </span>
+
+                    <small>{{ a.created_at|timesince }} ago</small>
+                </li>
+                {% endfor %}
+            </ul>
+
+            {% else %}
+            <p class="help">
+                Changes made in the dashboard are logged here.
+            </p>
+            {% endif %}
+        </div>
+
     </div>
-    <div class="card">
-      <div class="card-head"><h3>Recent activity</h3></div>
-      {% if activities %}<ul class="feed">{% for a in activities %}
-        <li><span><strong>{{ a.user.username|default:"System" }}</strong> {{ a.get_action_display|lower }} <em>{{ a.module }}</em>{% if a.object_repr %}: {{ a.object_repr }}{% endif %}</span><small>{{ a.created_at|timesince }} ago</small></li>{% endfor %}</ul>
-      {% else %}<p class="help">Changes made in the dashboard are logged here.</p>{% endif %}
+
+    <!-- Right column -->
+    <div>
+
+        <!-- Leads by status -->
+        <div class="card">
+            <div class="card-head">
+                <h3>Leads by status</h3>
+            </div>
+
+            {% for r in status_rows %}
+            <div class="bar-row">
+                <span>{{ r.label }}</span>
+
+                <div class="bar">
+                    <i style="--bar-width: {{ r.pct|default:0 }}%;"></i>
+                </div>
+
+                <b>{{ r.count }}</b>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- System status -->
+        <div class="card">
+            <div class="card-head">
+                <h3>System status</h3>
+            </div>
+
+            <ul class="feed">
+                <li>
+                    <span>SMTP email</span>
+
+                    {% if email_ok %}
+                    <span class="badge badge-on">Configured</span>
+                    {% else %}
+                    <a href="{% url 'dashboard:email' %}">
+                        <span class="badge badge-failed">Not configured</span>
+                    </a>
+                    {% endif %}
+                </li>
+
+                <li>
+                    <span>AI assistant</span>
+
+                    {% if ai.available %}
+                    <span class="badge badge-on">Ready</span>
+                    {% else %}
+                    <span class="badge badge-failed" title="{{ ai.message }}">
+                        Unavailable
+                    </span>
+                    {% endif %}
+                </li>
+            </ul>
+
+            {% if not ai.available %}
+            <p class="help" style="margin-top:8px">
+                {{ ai.message }}
+            </p>
+            {% endif %}
+        </div>
+
+        <!-- Quick actions -->
+        <div class="card">
+            <div class="card-head">
+                <h3>Quick actions</h3>
+            </div>
+
+            <div style="display:grid;gap:8px">
+
+                <a class="btn btn-ghost" href="{% url 'dashboard:module_create' 'portfolio' %}">
+                    <svg class="i"><use href="#i-plus"/></svg>
+                    Add portfolio project
+                </a>
+
+                <a class="btn btn-ghost" href="{% url 'dashboard:module_create' 'services' %}">
+                    <svg class="i"><use href="#i-plus"/></svg>
+                    Add service
+                </a>
+
+                <a class="btn btn-ghost" href="{% url 'dashboard:module_list' 'media' %}">
+                    <svg class="i"><use href="#i-upload"/></svg>
+                    Upload media
+                </a>
+
+                <a class="btn btn-ghost" href="{% url 'dashboard:ai_chat' %}">
+                    <svg class="i"><use href="#i-sparkles"/></svg>
+                    Ask the AI assistant
+                </a>
+
+            </div>
+        </div>
+
     </div>
-  </div>
-  <div>
-    <div class="card">
-      <div class="card-head"><h3>Leads by status</h3></div>
-      {% for r in status_rows %}<div class="bar-row"><span>{{ r.label }}</span><div class="bar"><i style="width:{{ r.pct }}%"></i></div><b>{{ r.count }}</b></div>{% endfor %}
-    </div>
-    <div class="card">
-      <div class="card-head"><h3>System status</h3></div>
-      <ul class="feed">
-        <li><span>SMTP email</span>{% if email_ok %}<span class="badge badge-on">Configured</span>{% else %}<a href="{% url 'dashboard:email' %}"><span class="badge badge-failed">Not configured</span></a>{% endif %}</li>
-        <li><span>AI assistant</span>{% if ai.available %}<span class="badge badge-on">Ready</span>{% else %}<span class="badge badge-failed" title="{{ ai.message }}">Unavailable</span>{% endif %}</li>
-      </ul>
-      {% if not ai.available %}<p class="help" style="margin-top:8px">{{ ai.message }}</p>{% endif %}
-    </div>
-    <div class="card">
-      <div class="card-head"><h3>Quick actions</h3></div>
-      <div style="display:grid;gap:8px">
-        <a class="btn btn-ghost" href="{% url 'dashboard:module_create' 'portfolio' %}"><svg class="i"><use href="#i-plus"/></svg> Add portfolio project</a>
-        <a class="btn btn-ghost" href="{% url 'dashboard:module_create' 'services' %}"><svg class="i"><use href="#i-plus"/></svg> Add service</a>
-        <a class="btn btn-ghost" href="{% url 'dashboard:module_list' 'media' %}"><svg class="i"><use href="#i-upload"/></svg> Upload media</a>
-        <a class="btn btn-ghost" href="{% url 'dashboard:ai_chat' %}"><svg class="i"><use href="#i-sparkles"/></svg> Ask the AI assistant</a>
-      </div>
-    </div>
-  </div>
+
 </div>
+
 {% endblock %}

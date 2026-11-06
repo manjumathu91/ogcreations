@@ -35,6 +35,7 @@ def style_fields(form):
             field.widget = forms.TextInput(attrs={"type": "color", "class": "input color"})
 
 
+
 class ModuleForm(forms.ModelForm):
     """Base ModelForm for generic CRUD: styling + 'choose from Media Library' for image fields."""
 
@@ -75,11 +76,26 @@ class ModuleForm(forms.ModelForm):
         if "additional_images" in self.fields:
             self.fields["additional_images"].queryset = MediaItem.objects.all()
             self.fields["additional_images"].help_text = "Tick images from the Media Library (upload new ones there first)."
+
         for m2m in ("gallery_images", "additional_images"):
             if m2m in self.fields:
-                self.fields[m2m].widget = forms.CheckboxSelectMultiple(attrs={"class": "checks"})
                 self.fields[m2m].queryset = MediaItem.objects.all()
 
+
+                self.fields[m2m].widget = forms.CheckboxSelectMultiple(
+    attrs={"class": "media-image-picker"}
+)
+
+                self.fields[m2m].help_text = (
+                    "Click images to select multiple images. "
+                    "Click again to deselect."
+                )
+
+
+       
+
+        
+        
     def clean(self):
         cleaned = super().clean()
         for name in self.library_fields:
@@ -87,22 +103,32 @@ class ModuleForm(forms.ModelForm):
                 self.add_error(name, "Upload an image or choose one from the Media Library.")
         return cleaned
 
+
     def save(self, commit=True):
         instance = super().save(commit=False)
+
         for name in self.library_fields:
             media = self.cleaned_data.get("library_" + name)
+
             if media and not self.files.get(name):
                 media.file.open("rb")
                 try:
                     data = media.file.read()
+                    filename = os.path.basename(media.file.name)
                 finally:
                     media.file.close()
-                getattr(instance, name).save(os.path.basename(media.file.name), ContentFile(data), save=False)
+
+                getattr(instance, name).save(
+                    filename,
+                    ContentFile(data),
+                    save=False
+                )
+
         if commit:
             instance.save()
             self.save_m2m()
-        return instance
 
+        return instance
 
 def build_modelform(module):
     return modelform_factory(

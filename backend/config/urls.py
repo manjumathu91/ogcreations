@@ -1,16 +1,18 @@
 from django.conf import settings
 from django.http import HttpResponse
-from django.shortcuts import redirect
+from django.shortcuts import redirect,render
 from django.urls import include, path, re_path
 from django.views.static import serve
 
 
 def robots(request):
     return HttpResponse("User-agent: *\nDisallow: /\n", content_type="text/plain")
+def public_home(request):
+    return render(request, "index.html")
 
 
 urlpatterns = [
-    path("", lambda request: redirect("dashboard:home"), name="root"),
+    path("", public_home, name="root"),
     path("robots.txt", robots),
     path("accounts/", include("apps.accounts.urls")),
     path("dashboard/", include("apps.dashboard.urls")),

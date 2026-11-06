@@ -100,10 +100,28 @@ class AboutSerializer(serializers.ModelSerializer):
         ]
 
 
+
 class ServicePublicSerializer(serializers.ModelSerializer):
+    additional_images = serializers.SerializerMethodField()
+
     class Meta:
         model = Service
-        fields = ["id", "title", "slug", "category", "short_description", "description", "icon", "image"]
+        fields = [
+            "id", "title", "slug", "category", "short_description",
+            "description", "icon", "image", "additional_images"
+        ]
+
+    def get_additional_images(self, obj):
+        request = self.context.get("request")
+        return [
+            {
+                "id": m.id,
+                "url": abs_url(request, m.file),
+                "alt_text": m.alt_text or obj.title,
+                "title": m.title,
+            }
+            for m in obj.additional_images.all()
+        ]
 
 
 class PortfolioPublicSerializer(serializers.ModelSerializer):
@@ -136,9 +154,27 @@ class ProcessSerializer(serializers.ModelSerializer):
 
 
 class BTSSerializer(serializers.ModelSerializer):
+    additional_images = serializers.SerializerMethodField()
+
     class Meta:
         model = BTSImage
-        fields = ["id", "image", "title", "description", "category"]
+        fields = [
+            "id", "image", "title", "description",
+            "category", "additional_images"
+        ]
+
+    def get_additional_images(self, obj):
+        request = self.context.get("request")
+        return [
+            {
+                "id": m.id,
+                "url": abs_url(request, m.file),
+                "alt_text": m.alt_text or obj.title,
+                "title": m.title,
+            }
+            for m in obj.additional_images.all()
+        ]
+
 
 
 class UpcomingSerializer(serializers.ModelSerializer):

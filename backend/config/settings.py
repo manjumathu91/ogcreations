@@ -94,7 +94,10 @@ WSGI_APPLICATION = "config.wsgi.application"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / "templates"],
+        "DIRS": [
+    BASE_DIR / "templates",
+    BASE_DIR.parent / "frontend",
+],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -163,7 +166,10 @@ USE_TZ = True
 # --------------------------------------------------------------------------- static & media
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
-STATICFILES_DIRS = [BASE_DIR / "static"]
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+    BASE_DIR.parent / "frontend" / "assets",
+]
 MEDIA_URL = "/media/"
 MEDIA_ROOT = Path(env("MEDIA_ROOT", str(BASE_DIR / "media")))
 # Serving uploads from Django is fine for small sites / demos. For heavy production use
