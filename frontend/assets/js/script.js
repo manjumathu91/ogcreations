@@ -1509,5 +1509,168 @@ async function loadGallery() {
       });
     }, 5000);
   }
+// =========================================
+// 19. PUBLIC AI CHAT ASSISTANT
+// =========================================
 
+{
+    const aiButton = document.getElementById("floating-ai");
+    const chatWindow = document.getElementById("ai-chat-window");
+    const closeButton = document.getElementById("ai-chat-close");
+    const chatForm = document.getElementById("ai-chat-form");
+    const chatInput = document.getElementById("ai-chat-input");
+    const sendButton = document.getElementById("ai-chat-send");
+    const messagesBox = document.getElementById("ai-chat-messages");
+
+    let aiAvailable = false;
+
+    function getAISessionId() {
+        let sessionId = sessionStorage.getItem("og_creations_ai_session_id");
+
+        if (!sessionId) {
+            if (window.crypto && window.crypto.randomUUID) {
+                sessionId = window.crypto.randomUUID().replace(/-/g, "");
+            } else {
+                sessionId = Date.now().toString(36) +
+                    Math.random().toString(36).substring(2) +
+                    Math.random().toString(36).substring(2);
+            }
+
+            sessionStorage.setItem("og_creations_ai_session_id", sessionId);
+        }
+
+        return sessionId;
+    }
+
+    function addAIMessage(message, type = "assistant") {
+        const messageElement = document.createElement("div");
+
+        messageElement.className =
+            type === "user"
+                ? "ai-message user-message"
+                : "ai-message assistant-message";
+
+        // Safe text rendering: API response is not treated as HTML.
+        messageElement.textContent = message;
+
+        messagesBox.appendChild(messageElement);
+        messagesBox.scrollTop = messagesBox.scrollHeight;
+
+        return messageElement;
+    }
+
+    async function checkAIStatus() {
+        try {
+            const response = await fetch(`${API}ai/status/`, {
+                method: "GET",
+                headers: {
+                    "Accept": "application/json"
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error("AI status request failed");
+            }
+
+            const data = await response.json();
+
+            aiAvailable = data.available === true;
+
+            if (data.welcome_message && messagesBox.children.length === 1) {
+                messagesBox.children[0].textContent = data.welcome_message;
+            }
+
+        } catch (error) {
+            console.error("AI status error:", error);
+            aiAvailable = false;
+        }
+    }
+
+    if (aiButton && chatWindow && closeButton &&
+        chatForm && chatInput && sendButton && messagesBox) {
+
+        aiButton.addEventListener("click", () => {
+            chatWindow.hidden = !chatWindow.hidden;
+
+            if (!chatWindow.hidden) {
+                chatInput.focus();
+            }
+        });
+
+        closeButton.addEventListener("click", () => {
+            chatWindow.hidden = true;
+        });
+
+        chatForm.addEventListener("submit", async (event) => {
+            event.preventDefault();
+
+            const message = chatInput.value.trim();
+
+            if (!message || sendButton.disabled) {
+                return;
+            }
+
+            addAIMessage(message, "user");
+            chatInput.value = "";
+            sendButton.disabled = true;
+            sendButton.textContent = "Sending...";
+
+            const loadingMessage = addAIMessage("Thinking...");
+
+            try {
+                const response = await fetch(`${API}ai/chat/`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Accept": "application/json"
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        session_id: getAISessionId()
+                    })
+                });
+
+                const data = await response.json();
+
+                loadingMessage.remove();
+
+                if (!response.ok) {
+                    throw new Error(
+                        data.detail ||
+                        data.error ||
+                        "Unable to get a response. Please try again."
+                    );
+                }
+
+                const reply =
+                    data.reply ||
+                    data.response ||
+                    data.answer ||
+                    data.message;
+
+                addAIMessage(
+                    typeof reply === "string"
+                        ? reply
+                        : "I couldn't understand the response. Please try again."
+                );
+
+            } catch (error) {
+                loadingMessage.remove();
+
+                console.error("Public AI chat error:", error);
+
+                addAIMessage(
+                    error.message || "Sorry, something went wrong. Please try again."
+                );
+
+            } finally {
+                sendButton.disabled = false;
+                sendButton.textContent = "Send";
+                chatInput.focus();
+            }
+        });
+
+        checkAIStatus();
+    }
+}
 });

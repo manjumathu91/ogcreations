@@ -22,6 +22,22 @@
       <div><div class="brand-name">{{ brand.site_name|default:"OG Creations" }}</div><div class="brand-sub">Studio Dashboard</div></div>
     </div>
     <nav class="nav">
+            <!-- AI ASSISTANTS -->
+      <div class="ai-nav-section">
+
+        <a class="nav-link ai-nav-link {% if request.resolver_match.url_name == 'ai_chat' %}active{% endif %}"
+           href="{% url 'dashboard:ai_chat' %}">
+          <svg class="i"><use href="#i-message-circle"/></svg>
+          <span>Admin AI Assistant</span>
+        </a>
+
+        <a class="nav-link ai-nav-link {% if request.resolver_match.url_name == 'ai_insights' %}active{% endif %}"
+           href="{% url 'dashboard:ai_insights' %}">
+          <svg class="i"><use href="#i-sparkles"/></svg>
+          <span>Public AI Assistant</span>
+        </a>
+
+      </div>
       {% for item in sidebar %}
         {% if item.kind == "link" %}
           <a class="nav-link {% if item.active %}active{% endif %}" href="{{ item.url }}">

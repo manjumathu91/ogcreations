@@ -741,7 +741,23 @@
 
 <!-- FLOATING PHONE & WHATSAPP BUTTONS -->
 <div class="floating-contact-buttons">
-
+  <!-- AI Assistant Button -->
+  <button
+    type="button"
+    id="floating-ai"
+    class="floating-contact ai-float"
+    aria-label="Open AI Assistant"
+    title="AI Assistant"
+  >
+    <svg xmlns="http://www.w3.org/2000/svg"
+         viewBox="0 0 24 24"
+         width="27" height="27"
+         fill="currentColor"
+         aria-hidden="true">
+      <path d="M12 2a2 2 0 0 0-2 2v.18A8 8 0 0 0 4 12v4a3 3 0 0 0 3 3h1v-7H7v4H6v-4a6 6 0 0 1 12 0v4h-1v-4h-1v7h1a3 3 0 0 0 3-3v-4a8 8 0 0 0-6-7.82V4a2 2 0 0 0-2-2z"/>
+      <path d="M9 21h6v-2H9z"/>
+    </svg>
+  </button>
   <!-- Phone Button -->
   <a
     href="#"
@@ -776,7 +792,38 @@
       <path d="M12.04 2a9.91 9.91 0 00-8.45 15.1L2 22l5.05-1.32A9.94 9.94 0 1012.04 2zm0 18.2a8.2 8.2 0 01-4.18-1.14l-.3-.18-3 .79.8-2.92-.2-.31A8.22 8.22 0 1112.04 20.2zm4.5-6.16c-.25-.13-1.47-.73-1.7-.81-.23-.09-.4-.13-.57.13-.17.25-.65.81-.8.98-.15.17-.3.19-.55.06-.25-.13-1.06-.39-2.02-1.25-.75-.67-1.26-1.5-1.41-1.75-.15-.25-.02-.39.11-.52.11-.11.25-.3.37-.45.13-.15.17-.25.25-.42.08-.17.04-.32-.02-.45-.06-.13-.57-1.37-.78-1.88-.2-.49-.41-.42-.57-.43h-.49c-.17 0-.45.06-.68.32-.23.25-.88.86-.88 2.1s.9 2.43 1.03 2.6c.13.17 1.77 2.7 4.29 3.79.6.26 1.07.42 1.44.53.6.19 1.15.16 1.58.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.15-1.18-.06-.1-.23-.17-.48-.3z"/>
     </svg>
   </a>
+<!-- AI CHAT WINDOW -->
+<div id="ai-chat-window" class="ai-chat-window" hidden>
 
+  <div class="ai-chat-header">
+    <div>
+      <h3>OG Creations AI</h3>
+      <span>How can we help you?</span>
+    </div>
+
+    <button type="button" id="ai-chat-close" aria-label="Close chat">
+      &times;
+    </button>
+  </div>
+
+  <div id="ai-chat-messages" class="ai-chat-messages">
+    <div class="ai-message assistant-message">
+      Hi! Welcome to OG Creations. How can I help you today?
+    </div>
+  </div>
+
+  <form id="ai-chat-form" class="ai-chat-form">
+    <input
+      type="text"
+      id="ai-chat-input"
+      placeholder="Ask something..."
+      maxlength="1000"
+      required
+    >
+    <button type="submit" id="ai-chat-send">Send</button>
+  </form>
+
+</div>
 </div>
 
 
